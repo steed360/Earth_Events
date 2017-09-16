@@ -1,0 +1,17 @@
+developed with python 2.7
+
+Using the scripts
+-----------------
+
+1. Download all scripts into a directory that you create, say EONET_CODE
+ 
+   You'll need rwx permissions
+
+2. Get the pre-requisite packages if you don't have them already on python 2.7.
+   I did this:
+
+pip install virtualenv
+virtualenv -v venv
+source venv/bin/activate
+pip install openpyxl
+

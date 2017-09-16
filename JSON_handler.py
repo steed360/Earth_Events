@@ -39,7 +39,7 @@ def getCategoriesDict ():
 if __name__ == '__main__' :
     fromDate = datetime.date ( 2017, 9, 1 )
     toDate   = datetime.date.today()
-    #d = getEventsDict ( fromDate, toDate )
-    #print d
-    getCategoriesDict ()
+    d = getEventsDict ( fromDate, toDate )
+    print d
+    #getCategoriesDict ()
     

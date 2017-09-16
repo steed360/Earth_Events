@@ -1,5 +1,6 @@
 import os
 import sqlite3
+import pprint
 
 db_path =    os.path.join (os.getcwd(),'event_db' )
 
@@ -9,7 +10,7 @@ Event_DDL = '''
           title          TEXT,
           description    TEXT,
           link           TEXT,
-          category_ID    TEXT,
+          category_id    TEXT,
           PRIMARY KEY (ID)
        )
      '''
@@ -19,9 +20,16 @@ Categories_DDL = '''
        category_id           TEXT, 
        category_title        TEXT,
        category_description  TEXT, 
-       category_layers       TEXT
+       category_layers       TEXT,
+       category_link         TEXT
     )
+'''
 
+Event_Categories_DDL = '''
+     CREATE TABLE Event_Categories (
+        event_id              TEXT,
+        category_id           TEXT
+   )
 '''
 
 def setUpDB ():
@@ -35,7 +43,6 @@ def setUpDB ():
     cursor.execute( Event_DDL)
     cursor.execute( Categories_DDL)
 
-    print 'd'
 
     db.commit()
     db.close()   
@@ -55,6 +62,34 @@ def loadEventsDict (eventsDictList):
     db.commit()
     db.close()   
 
+def loadCategoriesDict (categoriesDictList):
+
+    db = sqlite3.connect(db_path)
+    cursor = db.cursor()
+    
+    for aCat  in  categoriesDictList:
+
+        sqlStr = "insert into Categories (category_id, category_title, category_description, category_layers, category_link ) values ('%s', '%s', '%s', '%s', '%s')" %( aCat['id'], aCat['title'], aCat['description'],aCat['layers'], aCat['link'] )
+
+        # print sqlStr
+
+        cursor.execute (sqlStr )
+
+    db.commit()
+    db.close()   
+
+
+def viewRows (SQL):
+    db = sqlite3.connect(db_path)
+    cursor = db.cursor()
+  
+    cursor.execute(SQL)
+ 
+    rows = cursor.fetchall()
+ 
+    for row in rows:
+        #pprint (row)
+        print row
 if __name__ == '__main__' :
     setUpDB()
     
@@ -62,7 +97,16 @@ if __name__ == '__main__' :
     d = JSON_handler.getEventsDict ()
 
     loadEventsDict (d)
-     
-     
-     
+
+    c = JSON_handler.getCategoriesDict ()
+    loadCategoriesDict (c)
+    SQL =    ''' 
+select * 
+from Events e 
+
+'''
+    viewRows ( SQL) 
+
+
+
 
