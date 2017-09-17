@@ -17,11 +17,14 @@ def createWorkbook ():
     sheet['A2'] = 'EONET Events in the last 30 days'
 
     sheet['A4'] = 'Event ID'
-    sheet['B4'] = 'Description'
-    sheet['C4'] = '-'
+    sheet['B4'] = 'Title'
+    sheet['C4'] = 'Description'
     sheet['D4'] = 'Link'
     sheet['E4'] = 'Categories'
     sheet['F4'] = 'Country (where obtainable)'
+
+    std=wb.get_sheet_by_name('Sheet')
+    wb.remove_sheet(std)
 
     wb.save(  excel_file_path)
     wb.close()

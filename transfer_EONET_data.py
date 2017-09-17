@@ -40,7 +40,7 @@ db_handler.loadCategoriesDict (lstCatDicts)
 import datetime
 from datetime import timedelta
 toDate   = datetime.date.today()
-fromDate = toDate - timedelta (days = 1 )
+fromDate = toDate - timedelta (days = 30 )
 lstEventDicts = JSON_handler.getEventsDict ( fromDate, toDate )
 db_handler.loadEventsDict (lstEventDicts)
 
