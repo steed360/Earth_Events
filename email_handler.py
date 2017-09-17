@@ -10,6 +10,7 @@ def send_email(user, pwd, recipient, subject, body, attachment):
     from email.mime.multipart import MIMEMultipart
     from smtplib import SMTP
     import smtplib
+
     import sys
 
 
@@ -27,8 +28,8 @@ def send_email(user, pwd, recipient, subject, body, attachment):
         part = MIMEText( body )
         msg.attach(part)
  
-        part = MIMEApplication( open( excel_file_path  ,"rb").read() )
-        part.add_header('Content-Disposition', 'attachment', filename= excel_file_path   )
+        part = MIMEApplication( open( attachment  ,"rb").read() )
+        part.add_header('Content-Disposition', 'attachment', filename= attachment   )
         msg.attach(part)
  
 
@@ -52,7 +53,7 @@ if __name__ == '__main__':
     subject = 'an email'
     body    = 'hello...'
     excel_file_path =os.path.join (os.getcwd(),'EONET_Events.xlsx' )
-    send_email(user, pwd, recipient, subject, body, excel_file_path)
+    # send_email(user, pwd, recipient, subject, body, excel_file_path)
 
 
 

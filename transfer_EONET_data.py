@@ -1,105 +1,65 @@
 '''
-Incomplete script that loads one of the EONET tables into an SQLlite database.
-'''
 
-import json, urllib2
-import sqlite3
+Script to download data from EONET, put it into a spreadsheet and then to email 
+that spreadsheet
+
+'''
+import sys
 import logging
 import os
 
+
+'''
+Create a logger (which I really  found time to use properly)
+'''
+
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
-
-'''
- create a file handler
-'''
-
 handler = logging.FileHandler('transfer_data.log')
 formatter = logging.Formatter('%(asctime)s-%(levelname)s - %(message)s')
 handler.setFormatter(formatter)
 logger.addHandler(handler)
 
-url =  "https://eonet.sci.gsfc.nasa.gov/api/v2.1/events?days=30"  
-# 	&limit=100&status=open
+# Obtain email address
 
-'''
-Connect to the data
-'''
+if  len ( sys.argv ) < 2 :
+    print "usage: python transfer_EONET.py recipient_name@domain.com"
+    sys.exit ()
+ 
+recip_email = sys.argv[1]
+print recip_email
 
-data = json.load (urllib2.urlopen (url) )
-list_of_dicts = data ['events']
-logger.info ("There are %s records",len(list_of_dicts) )
+import JSON_handler
+import db_handler
 
-eventDict = list_of_dicts [0]
+db_handler.setUpDB()
 
+lstCatDicts = JSON_handler.getCategoriesDict ()
+db_handler.loadCategoriesDict (lstCatDicts)
 
-''' 
-Filter out the categories that are of no interest
-'''
-#  Specify categories of interest. I'm assuming Earthquakes and landslips are different entities. 
-#  relevCats = ['Severe Storms', 'Wildfires', 'Earthquakes']  c.f. examination.py
+import datetime
+from datetime import timedelta
+toDate   = datetime.date.today()
+fromDate = toDate - timedelta (days = 1 )
+lstEventDicts = JSON_handler.getEventsDict ( fromDate, toDate )
+db_handler.loadEventsDict (lstEventDicts)
 
-relevCatsSet = set (  ['Severe Storms', 'Wildfires'])
+lstResultsforSpreadsheet = db_handler.getEventData ()
 
-lstEventsFiltered = []
+import Excel_Handler as eh
+eh.createWorkbook ()
+eh.writeEvents ( lstResultsforSpreadsheet )
 
-for anEvent in list_of_dicts:
-    categortTitlesSet = set()
-    for anEventCategoryDict in anEvent['categories']:
-        categortTitlesSet.add ( anEventCategoryDict['title'] )
-    relevCatsFound =  categortTitlesSet.intersection (relevCatsSet  )
-    if ( len  ( relevCatsFound ) > 0):
-        lstEventsFiltered.append ( anEvent )
+import email_handler
 
+user = "johnsteedman360dev@gmail.com"
+pwd   = 'DEVED!23'
+subject = 'EONET Events Last 30 days'
+body    = 'Please find attached a listing of the EONET global Events limited to Wildfires, Severe Stores and Wilfires as requested. \n Kind regards, John'
+excel_file_path = eh.getExcelFilePath ()
 
-'''
-Create a basic SQL database
-'''
-
-db_path = os.path.join (os.getcwd(), 'event_db' )
-if (os.path.exists (db_path) ):
-    os.remove(  db_path)
-    logger.info ("removed database")
-
-
-db = sqlite3.connect('event_db')
-
-cursor = db.cursor()
-
-cursor.execute('''
-   CREATE TABLE Events (
-   id             TEXT,
-   title          TEXT,
-   description    TEXT,
-   link           TEXT,
-   PRIMARY KEY (ID)
-   )
-''')
-
-
-
-#TODO : Add date range from geom table
-
-
-db.commit()
-
-'''
-Insert the data into the database
-'''
-
-for anEvent in  lstEventsFiltered:
-
-    sqlStr = "insert into Events (id, title, description, link ) values ('%s', '%s', '%s', '%s')" %( anEvent['id'], anEvent['title'], anEvent['description'],anEvent['link'] )
-
-    cursor.execute (sqlStr )
-
-
-# cursor = db.cursor()
-db.commit()
-db.close()
-
-
-
+excel_file_path =os.path.join (os.getcwd(),'EONET_Events.xlsx' )
+email_handler.send_email(user, pwd, recip_email, subject, body, excel_file_path)
 
 
 

@@ -21,6 +21,15 @@ def getEventsDict ( fromDate = datetime.date.today(), toDate= datetime.date.toda
     list_of_dicts = data ['events']
     return list_of_dicts
 
+#def getEventsDict ( daysSince = 1 ):
+#    from datetime import timedelta
+#    toDate   = datetime.date.today()
+#   fromDate = toDate - timedelta ( daysSince )
+#   return getEventsDict ( fromDate, toDate)  File "/home/john/CODE/EONET_BASICS/JSON_handler.py", line 77
+
+
+
+
 def getCategoriesDict ():
     '''
     return a list of dictionaries, with fields as per link below
@@ -46,7 +55,7 @@ def getCountryForLatLon (lat, lon):
 
     try:
         data = json.load (urllib2.urlopen (url) )
-        lstFirstResultAddr =  data ['results'][1]['address_components']
+        lstFirstResultAddr =  data ['results'][0]['address_components']
 
         #brings back 
         '''
@@ -67,7 +76,7 @@ def getCountryForLatLon (lat, lon):
         return resDict.pop () ['long_name'] 
     except Exception as e:
         print "Cannot use maps.googleapis.com latlong country result for %s, %s" %(lat,lon)
-        print e 
+        print e
         return "Not Known"
 
 
