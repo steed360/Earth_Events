@@ -1,0 +1,4 @@
+EONET_Events.xlsx
+event_db
+*.pyc
+venv/
