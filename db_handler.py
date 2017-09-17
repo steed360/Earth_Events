@@ -5,12 +5,12 @@ import pprint
 db_path =    os.path.join (os.getcwd(),'event_db' )
 
 Event_DDL = '''
-       CREATE TABLE Events (
-          id             TEXT,
-          title          TEXT,
-          description    TEXT,
-          link           TEXT,
-          category_id    TEXT,
+       CREATE TABLE Events ( 
+          id                   TEXT,
+          title                TEXT,
+          description          TEXT,
+          link                 TEXT,
+          categories_text      TEXT,
           PRIMARY KEY (ID)
        )
      '''
@@ -42,7 +42,7 @@ def setUpDB ():
     cursor = db.cursor()
     cursor.execute( Event_DDL)
     cursor.execute( Categories_DDL)
-
+    cursor.execute (Event_Categories_DDL )
 
     db.commit()
     db.close()   
@@ -53,11 +53,29 @@ def loadEventsDict (eventsDictList):
     db = sqlite3.connect(db_path)
     cursor = db.cursor()
     
-    for anEvent in  eventsDictList:
+    for anEventDict in  eventsDictList:
 
-        sqlStr = "insert into Events (id, title, description, link ) values ('%s', '%s', '%s', '%s')" %( anEvent['id'], anEvent['title'], anEvent['description'],anEvent['link'] )
+        eventCats = anEventDict['categories']
 
+        lstCategories = []
+        for aCategoryDict in eventCats:
+            # flatten out the potentially multiple categories into a list             
+            lstCategories.append (aCategoryDict['title'])
+            # also preserve the many-many relationship with the categories reference table.
+            sqlStr = " insert into Event_Categories ( category_id, event_id ) values ('%s', '%s') " %(aCategoryDict ['id'], anEventDict['id'])
+            #print sqlStr
+            cursor.execute (sqlStr )
+
+        categoriesTxt = ','.join ( lstCategories )
+
+        if (len ( lstCategories ) > 1 ) : 
+            print categoriesText
+
+        print lstCategories
+
+        sqlStr = "insert into Events (id, title, description, link,categories_text ) values ('%s', '%s', '%s', '%s', '%s')" %( anEventDict['id'], anEventDict['title'], anEventDict['description'],anEventDict['link'], categoriesTxt  )
         cursor.execute (sqlStr )
+
 
     db.commit()
     db.close()   
@@ -93,19 +111,19 @@ def viewRows (SQL):
 if __name__ == '__main__' :
     setUpDB()
     
-    import JSON_handler
-    d = JSON_handler.getEventsDict ()
+    import JSON_handler, datetime
+    d = JSON_handler.getEventsDict (datetime.date (2017,3,1), datetime.date.today() )
 
     loadEventsDict (d)
 
     c = JSON_handler.getCategoriesDict ()
     loadCategoriesDict (c)
+
     SQL =    ''' 
 select * 
 from Events e 
-
 '''
-    viewRows ( SQL) 
+    #viewRows ( SQL) 
 
 
 

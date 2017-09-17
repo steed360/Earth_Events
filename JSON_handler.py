@@ -1,5 +1,3 @@
-
-
 import json, urllib2
 import datetime
 import os
@@ -36,10 +34,53 @@ def getCategoriesDict ():
 
     return data ['categories']
 
+def getCountryForLatLon (lat, lon):
+    '''
+
+
+    Uses the google API
+    c.f. https://stackoverflow.com/questions/4013606/google-maps-how-to-get-country-state-province-region-city-given-a-lat-long-va
+    '''
+    url = "http://maps.googleapis.com/maps/api/geocode/json?latlng=%s,%s&sensor=false" %(lat,lon)
+
+
+    try:
+        data = json.load (urllib2.urlopen (url) )
+        lstFirstResultAddr =  data ['results'][1]['address_components']
+
+        #brings back 
+        '''
+    "address_components" : [
+            {
+               "long_name" : "231",
+               "short_name" : "231",
+               "types" : [ "street_number" ]
+            },
+            {
+               "long_name" : "South 3rd Street",
+               "short_name" : "S 3rd St",
+               "types" : [ "route" ]
+            },  etc
+        '''
+
+        resDict = [thisDict for thisDict in lstFirstResultAddr if  'country' in thisDict['types']] 
+        return resDict.pop () ['long_name'] 
+    except Exception as e:
+        print "Cannot use maps.googleapis.com latlong country result for %s, %s" %(lat,lon)
+        print e 
+        return "Not Known"
+
+
 if __name__ == '__main__' :
+    res = getCountryForLatLon ( 49.0267333,  -117.3498 )
+    print res
+
+    res = getCountryForLatLon (  40.7110, -73.95831 )
+    print res
+
     fromDate = datetime.date ( 2017, 9, 1 )
     toDate   = datetime.date.today()
-    d = getEventsDict ( fromDate, toDate )
-    print d
+    #d = getEventsDict ( fromDate, toDate )
+    #print d
     #getCategoriesDict ()
     
