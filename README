@@ -1,4 +1,4 @@
-developed with python 2.7
+developed with python 2.7.3
 
 Using the scripts
 -----------------
@@ -10,8 +10,13 @@ Using the scripts
 2. Get the pre-requisite packages if you don't have them already on python 2.7.
    I did this:
 
-pip install virtualenv
 virtualenv -v venv
 source venv/bin/activate
 pip install openpyxl
+
+
+3. Run the program 
+
+(venv) username> python transfer_EONET_data.py <recipient email address>
+
 
