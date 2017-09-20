@@ -27,7 +27,7 @@ if  len ( sys.argv ) < 2 :
     sys.exit ()
  
 recip_email = sys.argv[1]
-print recip_email
+print "Working..."
 
 import JSON_handler
 import db_handler
@@ -37,18 +37,25 @@ db_handler.setUpDB()
 lstCatDicts = JSON_handler.getCategoriesDict ()
 db_handler.loadCategoriesDict (lstCatDicts)
 
+print "... downloading JSON and loading into database"
+
 import datetime
 from datetime import timedelta
 toDate   = datetime.date.today()
-fromDate = toDate - timedelta (days = 30 )
+fromDate = toDate - timedelta (days = 365 )
 lstEventDicts = JSON_handler.getEventsDict ( fromDate, toDate )
 db_handler.loadEventsDict (lstEventDicts)
+db_handler.loadEventGeometries (lstEventDicts)
 
 lstResultsforSpreadsheet = db_handler.getEventData ()
 
+print "... compiling spreadsheet"
 import Excel_Handler as eh
 eh.createWorkbook ()
 eh.writeEvents ( lstResultsforSpreadsheet )
+
+
+print "... emailing"
 
 import email_handler
 
@@ -61,5 +68,5 @@ excel_file_path = eh.getExcelFilePath ()
 excel_file_path =os.path.join (os.getcwd(),'EONET_Events.xlsx' )
 email_handler.send_email(user, pwd, recip_email, subject, body, excel_file_path)
 
-
+print "... your email has been sent"
 

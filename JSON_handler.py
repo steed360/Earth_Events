@@ -19,7 +19,9 @@ def getEventsDict ( fromDate = datetime.date.today(), toDate= datetime.date.toda
     # 	&limit=100&status=open
     data = json.load (urllib2.urlopen (url) )
     list_of_dicts = data ['events']
+
     return list_of_dicts
+
 
 #def getEventsDict ( daysSince = 1 ):
 #    from datetime import timedelta
@@ -75,8 +77,8 @@ def getCountryForLatLon (lat, lon):
         resDict = [thisDict for thisDict in lstFirstResultAddr if  'country' in thisDict['types']] 
         return resDict.pop () ['long_name'] 
     except Exception as e:
-        print "Cannot use maps.googleapis.com latlong country result for %s, %s" %(lat,lon)
-        print e
+        #print "Cannot use maps.googleapis.com latlong country result for %s, %s" %(lat,lon)
+        #print e
         return "Not Known"
 
 

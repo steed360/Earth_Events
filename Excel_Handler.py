@@ -22,6 +22,8 @@ def createWorkbook ():
     sheet['D4'] = 'Link'
     sheet['E4'] = 'Categories'
     sheet['F4'] = 'Country (where obtainable)'
+    sheet['G4'] = 'Earliest Recorded Date'
+    sheet['H4'] = 'Latest Recorded Date'
 
     std=wb.get_sheet_by_name('Sheet')
     wb.remove_sheet(std)

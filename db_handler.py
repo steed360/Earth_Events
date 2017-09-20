@@ -33,6 +33,16 @@ Event_Categories_DDL = '''
    )
 '''
 
+Event_Geometry_DDL = '''
+     CREATE TABLE Event_Geometry (
+        event_id              TEXT,
+        geom_date             DATETIME,
+        geometry_type         TEXT,
+        coordinates           TEXT
+   )
+'''
+
+
 def setUpDB ():
 
     if (os.path.exists (db_path) ):
@@ -44,17 +54,14 @@ def setUpDB ():
     cursor.execute( Event_DDL)
     cursor.execute( Categories_DDL)
     cursor.execute (Event_Categories_DDL )
+    cursor.execute (Event_Geometry_DDL )
 
     db.commit()
     db.close()   
 
 
- 
-
-
-
-
 def filterEventDictList (lstEventDicts):
+
 
     ''' 
     This function goes through the JSON structure of events and filters them
@@ -127,6 +134,23 @@ def loadEventsDict (eventsDictList):
     db.commit()
     db.close()   
 
+def loadEventGeometries ( lstEventDicts):
+
+    db = sqlite3.connect(db_path)
+    cursor = db.cursor()
+
+    for anEventDict in  lstEventDicts:
+
+        for aGeomDict in anEventDict ['geometries']:
+            
+            SQL = ''' insert into Event_Geometry ( event_id, geom_date, geometry_type,
+                       coordinates )
+                      values ( '%s', '%s','%s','%s' ) ''' %(anEventDict['id'],aGeomDict['date'], aGeomDict['type'], aGeomDict['coordinates'] )
+
+            cursor.execute (SQL)
+    db.commit ()
+    db.close()
+
 def loadCategoriesDict (categoriesDictList):
 
     db = sqlite3.connect(db_path)
@@ -159,12 +183,19 @@ def viewRows (SQL):
 
 def getEventData ():
     SQL = '''
-       select e.* 
+       select e.id, e.title, e.description, e.link, e.categories_text, e.country, 
+              min (date(eg.geom_date )) as earliest_date,
+              max (date(eg.geom_date )) as latest_date 
        from Events e
        inner join Event_Categories ec on ( e.id = ec.event_id )
        inner join Categories c  on ( ec.category_id = c.category_id ) 
+       left join Event_Geometry  eg on ( e.id = eg.event_id )
        where c.category_title in  ( 'Severe Storms', 'Wildfires','Landslides' )
+       group by e.id, e.title, e.description, e.link, e.categories_text, e.country
+
     '''
+
+
 
     db = sqlite3.connect(db_path)
     cursor = db.cursor()
@@ -179,22 +210,18 @@ if __name__ == '__main__' :
     setUpDB()
 
     import JSON_handler, datetime
-    #d = JSON_handler.getEventsDict (datetime.date (2017,8,1), datetime.date.today() )
-    d = JSON_handler.getEventsDict (2 )
+    d = JSON_handler.getEventsDict (datetime.date (2017,9,19), datetime.date.today() )
+    # d = JSON_handler.getEventsDict (2 )
 
     loadEventsDict (d)
+    loadEventGeometries (d)
 
     c = JSON_handler.getCategoriesDict ()
     loadCategoriesDict (c)
 
     SQL =    ''' 
-select * 
-from Events e 
-'''
-
-    SQL =    ''' 
-select * 
-from Categories 
+select *  
+from Event_Geometry 
 '''
 
     #viewRows ( SQL) 
